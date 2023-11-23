@@ -1,0 +1,20 @@
+para implementar en python:
+
+# Lista de proxies
+proxy_list = [
+    'http://proxy1_address:proxy1_port',
+    'http://proxy2_address:proxy2_port',
+    'http://proxy3_address:proxy3_port',
+    # Agrega más proxies según sea necesario
+]
+
+zapa = sys.argv[1]
+
+# Elegir un proxy al azar
+proxy_url = random.choice(proxy_list)
+
+# Configura el proxy
+proxies = {
+    'http': proxy_url,
+    'https': proxy_url,
+}

@@ -1,0 +1,40 @@
+ya instalado python, unicamente entra en el entorno virtual con: source venv/bin/activate
+
+npm run dev 
+
+deactivate para salir
+
+y ya puedes usar el back!
+
+
+----------
+Instala Python en tu sistema:
+Si aún no tienes Python instalado en tu sistema, 
+debes descargar e instalar Python desde el sitio web oficial de Python: Descargar Python.
+----------
+Crea un entorno virtual de Python para tu proyecto:
+Abre una terminal en la carpeta raíz de tu proyecto.
+Ejecuta el siguiente comando para crear un entorno virtual de Python. Esto aislará las dependencias de Python de tu proyecto de las instaladas globalmente en tu sistema.
+En sistemas Unix/Linux/macOS:
+python3 -m venv venv
+----------
+Activa el entorno virtual:
+Debes activar el entorno virtual cada vez que trabajes en tu proyecto. Esto cambiará la versión de Python utilizada por tu proyecto.
+En sistemas Unix/Linux/macOS:
+source venv/bin/activate
+----------
+Instala las dependencias de Python:
+Una vez que el entorno virtual está activado, puedes usar el comando pip para instalar las dependencias de Python específicas para tu proyecto. Por ejemplo:
+bash
+Copy code
+pip install requests  # Instala la biblioteca "requests"
+----------
+Desactiva el entorno virtual:
+Cuando hayas terminado de trabajar en tu proyecto, puedes desactivar el entorno virtual.
+En cualquier sistema:
+
+deactivate
+
+Estos pasos te permitirán utilizar una instalación aislada de Python para tu proyecto.
+ Asegúrate de que tu aplicación Node.js
+ pueda interactuar con Python utilizando el entorno virtual configurado.
