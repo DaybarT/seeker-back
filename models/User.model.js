@@ -19,10 +19,6 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Name is required."],
     },
-    image:{
-      type: String,
-      required: true
-    },
     username: {
       type: String,
       required: [true, "Username is required"],

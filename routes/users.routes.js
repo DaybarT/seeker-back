@@ -50,7 +50,6 @@ router.post("/register", async (req, res) => {
       email: email,
       password: hashedPassword,
       fullName: fullName,
-      image: process.env.IMAGE_DEFAULT,
       username: username,
       role: process.env.ROLE,
     });
@@ -92,8 +91,7 @@ router.post("/login", async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       username: user.username,
-      role: user.role,
-      image: user.image,
+      role: user.role
     };
 
     const token = jwt.sign(payload, process.env.TOKEN_SECRET, {
@@ -161,7 +159,7 @@ router.post("/update", isAuthenticated, async (req, res) => {
     const token = req.headers.authorization.split(" ")[1];
 
     const decoded = await jwt.verify(token, process.env.TOKEN_SECRET);
-
+    console.log(decoded);
     let newEmail = email ? email : decoded.email;
     let newPassword = password
       ? await bcrypt.hash(password, 10)
@@ -186,9 +184,23 @@ router.post("/update", isAuthenticated, async (req, res) => {
     );
     console.log(updateProfile);
 
+    const user = await User.findOne({ _id: decoded.userId });
+
+    const payload = {
+      userId: user._id, // Puedes incluir otros datos del usuario aquí
+      fullName: user.fullName,
+      email: user.email,
+      username: user.username,
+      role: user.role
+    };
+
+    const newtoken = jwt.sign(payload, process.env.TOKEN_SECRET, {
+      expiresIn: "3h",
+    });
+
     res
       .status(200)
-      .json({ message: "Perfil actualizado correctamente", updateProfile });
+      .json({ message: "Perfil actualizado correctamente", newtoken });
   } catch (error) {
     res.status(500).json({ message: "Hubo un error al actualizar el perfil" });
   }
@@ -241,36 +253,4 @@ router.post("/UpdatePass", async (req, res) => {
 
 module.exports = router;
 
-/*
-cloudinary.v2.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-    secure: true,
-  });
 
-const uniqueId = uuidv4();
-
-cloudinary.v2.uploader.upload(
-        newFile,
-        {
-          public_id: uniqueId,
-        },
-        async function (error, result) {
-          if (error) {
-            console.error("Error en la carga de la imagen:", error);
-            return res
-              .status(500)
-              .json({ error: "Error en la carga de la imagen" });
-          }
-
-          newImage = result.url; // Asignar a la variable declarada fuera del bloque
-          console.log(newImage)
-          res.status(200).json({ message: "Imagen subida correctamente" });
-        }
-      );
-
-
-
-
-*/
