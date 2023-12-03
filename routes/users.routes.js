@@ -222,6 +222,9 @@ router.post("/ForgotPassword", async (req, res) => {
     if (foundUser) {
       res.status(200).json({ "usuario encontrado: ": foundUser });
     }
+    else{
+      res.status(400).json({error: "Email no existente"});
+    }
   } catch (error) {
     console.error("Error en la solicitud ForgotPassword:", error);
     res.status(500).json({ error: "Error interno del servidor" });

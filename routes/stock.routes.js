@@ -58,7 +58,7 @@ router.post("/AddStock", isAuthenticated, async (req, res) => {
       await newStock.save();
       res.status(200).json({ mensaje: "Producto registrado" });
     } else {
-      res.status(400).json({ error: "El producto" });
+      res.status(400).json({ error: "El SKU no existe, o faltan campos" });
     }
   } catch (error) {
     res.status(500).json({ error: "Error al añadir el producto a tu stock" });

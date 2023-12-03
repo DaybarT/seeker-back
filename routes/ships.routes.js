@@ -41,10 +41,13 @@ router.post("/newTracking", isAuthenticated, async (req, res, next) => {
     });
 
     await newShip.save();
-    res.status(200).json(newShip);
-  } catch (err) {
-    console.error("Error en la solicitud:", err);
-    res.status(500).json({ error: "Error interno del servidor" }); // Enviar respuesta HTTP 500 al cliente
+    if (newShip){
+      res.status(200).json(newShip);
+    }
+    
+  } catch (error) {
+    console.error("Error en la solicitud:", error);
+    res.status(401).json({error :"Faltan campos"});
   }
 });
 
