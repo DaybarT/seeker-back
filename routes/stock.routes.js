@@ -18,14 +18,8 @@ router.post("/AddStock", isAuthenticated, async (req, res) => {
 
     const { SKU, precio, talla } = req.body;
 
-    let newStock; 
-    if (decoded.role === "owner") { //Owner
-      newStock = new Stock({
-        username: decoded.username,
-        SKU: SKU,
-        precio: precio,
-        talla: talla,
-      });
+    let newStock;
+    if (decoded.role === "owner") {
       const url = "http://localhost:5005/productTool/addProduct";
       const options = {
         method: "POST",
@@ -39,9 +33,11 @@ router.post("/AddStock", isAuthenticated, async (req, res) => {
         const response = await fetch(url, options);
         const body = await response.json();
         console.log("Producto registrado:", body);
+        res.status(200).json({ mensaje: "Producto registrado" });
       } catch (error) {
         console.error("Producto fallido:", error);
       }
+      res.status(200).json({ mensaje: "Producto scrappeado" });
     } else {
       const product = await Product.findOne({ SKU });
       if (product) {

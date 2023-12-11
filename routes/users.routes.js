@@ -10,53 +10,44 @@ const { v4: uuidv4 } = require("uuid");
 // registro de usuarios -> auth/register
 router.post("/register", async (req, res) => {
   try {
-    // obtenemos los datos del cuerpo de la solicitud
     const { email, password, fullName, username } = req.body;
+    const errors = [];
 
-    // revisa si los valores no estan vacios
     if (email === "" || password === "" || fullName === "" || username === "") {
-      res.status(400).json({ message: "Rellena todos los campos" });
-      return;
+      errors.push("Rellena todos los campos");
     }
 
-    // mira si es una email valido
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     if (!emailRegex.test(email)) {
-      res.status(400).json({ message: "Introduce un email valido" });
-      return;
+      errors.push("Introduce un email valido");
     }
 
-    User.findOne({ email }).then((foundUser) => {
-      // si el email ya esta registrado, arrojara un error
-      if (foundUser) {
-        res.status(400).json({ message: "Email ya registrado" });
-        return;
-      }
-    });
+    const foundUser = await User.findOne({ email });
+    if (foundUser) {
+      errors.push("Email ya registrado");
+    }
 
-    User.findOne({ username }).then((foundUsername) => {
-      // si el nombre de usuario ya esta registrado, arrojara un error
-      if (foundUsername) {
-        res.status(400).json({ message: "Nombre de usuario ya registrado" });
-        return;
-      }
-    });
+    const foundUsername = await User.findOne({ username });
+    if (foundUsername) {
+      errors.push("Nombre de usuario ya registrado");
+    }
 
-    // Genera el hash de la contraseña
-    const hashedPassword = await bcrypt.hash(password, 10);
+    if (errors.length > 0) {
+      res.status(400).json({ messages: errors });
+    } else {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = new User({
+        email: email,
+        password: hashedPassword,
+        fullName: fullName,
+        username: username,
+        role: process.env.ROLE,
+      });
 
-    // creamos una instancia del modelo User
-    const newUser = new User({
-      email: email,
-      password: hashedPassword,
-      fullName: fullName,
-      username: username,
-      role: process.env.ROLE,
-    });
-    // guardamos el usuario en la base de datos
-    await newUser.save();
+      await newUser.save();
 
-    res.status(201).json({ message: "Usuario registrado con éxito" });
+      res.status(201).json({ message: "Usuario registrado con éxito" });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Error al registrar el usuario" });
@@ -91,7 +82,7 @@ router.post("/login", async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       username: user.username,
-      role: user.role
+      role: user.role,
     };
 
     const token = jwt.sign(payload, process.env.TOKEN_SECRET, {
@@ -191,7 +182,7 @@ router.post("/update", isAuthenticated, async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       username: user.username,
-      role: user.role
+      role: user.role,
     };
 
     const newtoken = jwt.sign(payload, process.env.TOKEN_SECRET, {
@@ -221,9 +212,8 @@ router.post("/ForgotPassword", async (req, res) => {
 
     if (foundUser) {
       res.status(200).json({ "usuario encontrado: ": foundUser });
-    }
-    else{
-      res.status(400).json({error: "Email no existente"});
+    } else {
+      res.status(400).json({ error: "Email no existente" });
     }
   } catch (error) {
     console.error("Error en la solicitud ForgotPassword:", error);
@@ -255,5 +245,3 @@ router.post("/UpdatePass", async (req, res) => {
 });
 
 module.exports = router;
-
-
