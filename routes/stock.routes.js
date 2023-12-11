@@ -69,8 +69,13 @@ router.get("/GetStock", async (req, res) => {
     }
     const token = req.headers.authorization.split(" ")[1];
     const decoded = await jwt.verify(token, process.env.TOKEN_SECRET);
+    let allStock;
 
-    const allStock = await Stock.find({ username: decoded.username });
+    if (decoded.role === "owner") {
+      allStock = await Stock.find();
+    } else {
+      allStock = await Stock.find({ username: decoded.username });
+    }
     const stockPrices = await Hypeboost.find();
     const productData = await Product.find();
 
@@ -90,6 +95,7 @@ router.get("/GetStock", async (req, res) => {
       }
 
       return {
+        username: stockItem.username,
         _id: stockItem._id,
         SKU: stockItem.SKU,
         precio: stockItem.precio,

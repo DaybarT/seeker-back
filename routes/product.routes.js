@@ -5,6 +5,7 @@ const { isAuthenticated } = require("../middleware/jwt.middleware");
 const { spawn } = require("child_process");
 const Hypeboost = require("../models/Hypeboost.model");
 const jwt = require("jsonwebtoken");
+const Stock = require("../models/Stock.model");
 
 const moment = require("moment");
 
@@ -43,36 +44,36 @@ router.post("/addProduct", isAuthenticated, async (req, res) => {
     try {
       const jsonData = JSON.parse(data.toString());
       console.log(jsonData);
+      if (jsonData) {
+        const newProduct = new Product({
+          SKU,
+          model: jsonData.name,
+          img: jsonData.image,
+        });
+        await newProduct.save();
 
-      const newProduct = new Product({
-        SKU,
-        model: jsonData.name,
-        img: jsonData.image,
-      });
-      await newProduct.save();
+        const url = "http://localhost:5005/hb/createhb";
+        const options = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: req.headers.authorization,
+          },
+          body: JSON.stringify({
+            SKU: SKU,
+            sizePrices: jsonData.size_price,
+            Link: jsonData.link,
+          }),
+        };
 
-      const url = "http://localhost:5005/hb/createhb";
-      const options = {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: req.headers.authorization,
-        },
-        body: JSON.stringify({
-          SKU: SKU,
-          sizePrices: jsonData.size_price,
-          Link: jsonData.link,
-        }),
-      };
-
-      try {
-        const response = await fetch(url, options);
-        const body = await response.json();
-        console.log("Precios registrados:", body);
-      } catch (error) {
-        console.error("Precios no registrados:", error);
+        try {
+          const response = await fetch(url, options);
+          const body = await response.json();
+          console.log("Precios registrados:", body);
+        } catch (error) {
+          console.error("Precios no registrados:", error);
+        }
       }
-
       return res.status(200).json({ message: "Producto guardado con éxito" });
     } catch (error) {
       console.error("Error del script, contacte con el owner", error);
@@ -95,7 +96,7 @@ router.get("/GetProducts", isAuthenticated, async (req, res) => {
         return res.status(401).json({ message: "Token no válido" });
       }
     });
-
+    const users = await Stock.find();
     const productData = await Product.find();
     const stockPrices = await Hypeboost.find();
 
@@ -109,6 +110,14 @@ router.get("/GetProducts", isAuthenticated, async (req, res) => {
         const date = new Date(matchingPrice.Fecha);
         formattedDate = date.toLocaleString(); // Puedes usar otras funciones para el formato deseado
       }
+      // Filtrar usuarios que coincidan con el SKU actual
+      const matchedUsers = users.filter((user) => user.SKU === productItem.SKU);
+
+      // Obtener solo los nombres de usuario de los usuarios filtrados
+      const usernames = matchedUsers.map((user) => ({
+        username: user.username,
+        talla: user.talla,
+      }));
 
       return {
         SKU: productItem.SKU,
@@ -116,6 +125,7 @@ router.get("/GetProducts", isAuthenticated, async (req, res) => {
         img: productItem.img,
         sizePrices: matchingPrice ? matchingPrice.sizePrices : null,
         Fecha: formattedDate,
+        stockAvailable: usernames,
       };
     });
 

@@ -26,28 +26,29 @@ router.post("/newTracking", isAuthenticated, async (req, res, next) => {
     }
     const token = req.headers.authorization.split(" ")[1];
     const decoded = await jwt.verify(token, process.env.TOKEN_SECRET);
+    let newShip;
+    if (decoded.role != "owner") {
+      const newShip = new Ships({
+        name: shipName,
+        track: shipTrack,
+        slug: slug,
+        destino: shipDestino || null,
+        origen: shipOrigen || null,
+        cPostal: shipCpostal || null,
+        fEnvio: shipFenvio || null,
+        idAfterShip: null,
+        isSended: false,
+        username: decoded.username,
+      });
 
-    const newShip = new Ships({
-      name: shipName,
-      track: shipTrack,
-      slug: slug,
-      destino: shipDestino || null,
-      origen: shipOrigen || null,
-      cPostal: shipCpostal || null,
-      fEnvio: shipFenvio || null,
-      idAfterShip: null,
-      isSended: false,
-      username: decoded.username,
-    });
-
-    await newShip.save();
-    if (newShip){
+      await newShip.save();
+    }
+    if (newShip) {
       res.status(200).json(newShip);
     }
-    
   } catch (error) {
     console.error("Error en la solicitud:", error);
-    res.status(401).json({error :"Faltan campos"});
+    res.status(401).json({ error: "Faltan campos" });
   }
 });
 
@@ -196,7 +197,7 @@ router.get("/getTracking/:_id", async (req, res, next) => {
       .then((result) => {
         console.log(result);
         // Si obtienes los datos correctamente, puedes enviar el resultado con un código 200
-        res.status(200).json({result });
+        res.status(200).json({ result });
       })
       .catch((e) => {
         console.log(e);
