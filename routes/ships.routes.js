@@ -26,8 +26,8 @@ router.post("/newTracking", isAuthenticated, async (req, res, next) => {
     }
     const token = req.headers.authorization.split(" ")[1];
     const decoded = await jwt.verify(token, process.env.TOKEN_SECRET);
-    let newShip;
-    if (decoded.role != "owner") {
+
+    if (decoded.role !== "owner") {
       const newShip = new Ships({
         name: shipName,
         track: shipTrack,
@@ -42,13 +42,17 @@ router.post("/newTracking", isAuthenticated, async (req, res, next) => {
       });
 
       await newShip.save();
-    }
-    if (newShip) {
-      res.status(200).json(newShip);
+      return res.status(200).json(newShip); 
+    } else {
+      return res
+        .status(401)
+        .json({
+          error: "Solo tienes permisos de administración",
+        });
     }
   } catch (error) {
     console.error("Error en la solicitud:", error);
-    res.status(401).json({ error: "Faltan campos" });
+    return res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 

@@ -29,15 +29,18 @@ router.post("/AddStock", isAuthenticated, async (req, res) => {
         },
         body: JSON.stringify({ SKU }),
       };
+
       try {
         const response = await fetch(url, options);
         const body = await response.json();
         console.log("Producto registrado:", body);
-        res.status(200).json({ mensaje: "Producto registrado" });
+        return res.status(200).json({ mensaje: "Producto registrado" });
       } catch (error) {
         console.error("Producto fallido:", error);
+        return res
+          .status(500)
+          .json({ error: "Error al scrappear el producto" });
       }
-      res.status(200).json({ mensaje: "Producto scrappeado" });
     } else {
       const product = await Product.findOne({ SKU });
       if (product) {
@@ -52,12 +55,16 @@ router.post("/AddStock", isAuthenticated, async (req, res) => {
 
     if (newStock) {
       await newStock.save();
-      res.status(200).json({ mensaje: "Producto registrado" });
+      return res.status(200).json({ mensaje: "Producto registrado" });
     } else {
-      res.status(400).json({ error: "El SKU no existe, o faltan campos" });
+      return res
+        .status(400)
+        .json({ error: "El SKU no existe, o faltan campos" });
     }
   } catch (error) {
-    res.status(500).json({ error: "Error al añadir el producto a tu stock" });
+    return res
+      .status(500)
+      .json({ error: "Error al añadir el producto a tu stock" });
   }
 });
 
