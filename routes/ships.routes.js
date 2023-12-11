@@ -62,7 +62,12 @@ router.get("/getTrackings", async (req, res, next) => {
     }
     const token = req.headers.authorization.split(" ")[1];
     const decoded = await jwt.verify(token, process.env.TOKEN_SECRET);
-    const allShips = await Ships.find({ username: decoded.username });
+    let allShips;
+    if (decoded.role === "owner") {
+      allShips = await Ships.find();
+    } else {
+      allShips = await Ships.find({ username: decoded.username });
+    }
     res.status(200).json({ ships: allShips });
   } catch (error) {
     console.error("Error:", error);
