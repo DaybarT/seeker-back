@@ -69,7 +69,7 @@ router.post("/AddStock", isAuthenticated, async (req, res) => {
 });
 
 //const userStock = await Stock.find({ username: userUsername }); req.user.username,
-router.get("/GetStock", async (req, res) => {
+router.get("/GetStock", isAuthenticated,async (req, res) => {
   try {
     if (!req.headers.authorization) {
       return res.status(401).json({ message: "Token no proporcionado" });

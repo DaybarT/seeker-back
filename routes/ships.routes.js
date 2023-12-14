@@ -57,7 +57,7 @@ router.post("/newTracking", isAuthenticated, async (req, res, next) => {
 });
 
 // isAuthenticated
-router.get("/getTrackings", async (req, res, next) => {
+router.get("/getTrackings", isAuthenticated,async (req, res, next) => {
   //recuperar todos los trackings por usuario
   // ESTO YA FUNCIONA
   try {
@@ -178,7 +178,7 @@ router.get("/goTrack/:_id", isAuthenticated, async (req, res, next) => {
   }
 });
 
-router.get("/getTracking/:_id", async (req, res, next) => {
+router.get("/getTracking/:_id", isAuthenticated,async (req, res, next) => {
   // ESTO YA FUNCIONA
   //llamada a la api con su id para ver en que puntos esta el pedido
   const _id = req.params._id;
