@@ -7,7 +7,6 @@ const { isAuthenticated } = require("../middleware/jwt.middleware");
 const cloudinary = require("cloudinary");
 const { v4: uuidv4 } = require("uuid");
 
-// registro de usuarios -> auth/register
 router.post("/register", async (req, res) => {
   try {
     const { email, password, fullName, username } = req.body;
@@ -156,7 +155,7 @@ router.post("/update", isAuthenticated, async (req, res) => {
       ? await bcrypt.hash(password, 10)
       : decoded.password;
     let newFullName = fullName ? fullName : decoded.fullName;
-
+    //el anterior algoritmo revisa si los campos pasados estan vacios, en el caso de que no lo sean, los usa , si no, coge los del token.
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     if (email && !emailRegex.test(newEmail)) {
       res.status(400).json({ message: "Introduce un email valido" });
@@ -188,7 +187,7 @@ router.post("/update", isAuthenticated, async (req, res) => {
     const newtoken = jwt.sign(payload, process.env.TOKEN_SECRET, {
       expiresIn: "3h",
     });
-
+    //renovamos el token y lo volvemos a mandar con los datos
     res
       .status(200)
       .json({ message: "Perfil actualizado correctamente", newtoken });
@@ -207,11 +206,11 @@ router.post("/ForgotPassword", async (req, res) => {
       res.status(400).json({ message: "Introduce un email válido" });
       return;
     }
-
+    //revisa si el email es valido y si existe
     const foundUser = await User.findOne({ email });
 
     if (foundUser) {
-      res.status(200).json({ "usuario encontrado: ": foundUser });
+      res.status(200).json({ "usuario encontrado: ": foundUser }); //lo devuelve al front para comprobar si es ese y si es pues pasa a la siguiente pantalla
     } else {
       res.status(400).json({ error: "Email no existente" });
     }
@@ -223,8 +222,8 @@ router.post("/ForgotPassword", async (req, res) => {
 
 router.post("/UpdatePass", async (req, res) => {
   try {
+    //aqui vuelve a recibir el email precargado de la anterior pantalla, y ya inicia el cambio de contraseña.
     const { email, password } = req.body;
-
     const newPassword = await bcrypt.hash(password, 10);
     const updateProfile = await User.updateOne(
       { email: email },

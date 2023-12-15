@@ -7,10 +7,7 @@ const jwt = require("jsonwebtoken");
 
 const Aftership = new AfterShip(process.env.AFTERSHIP_API_KEY);
 
-// isAuthenticated
 router.post("/newTracking", isAuthenticated, async (req, res, next) => {
-  //crear el track en la bbdd para controlar al user
-  // ESTO YA FUNCIONA
   const {
     shipName,
     shipTrack,
@@ -26,7 +23,7 @@ router.post("/newTracking", isAuthenticated, async (req, res, next) => {
     }
     const token = req.headers.authorization.split(" ")[1];
     const decoded = await jwt.verify(token, process.env.TOKEN_SECRET);
-
+    //recoge los campos que no esten vacios, los registra en la bbdd dependiendo de eso.
     if (decoded.role !== "owner") {
       const newShip = new Ships({
         name: shipName,
@@ -56,14 +53,13 @@ router.post("/newTracking", isAuthenticated, async (req, res, next) => {
   }
 });
 
-// isAuthenticated
+
 router.get("/getTrackings", isAuthenticated,async (req, res, next) => {
-  //recuperar todos los trackings por usuario
-  // ESTO YA FUNCIONA
   try {
     if (!req.headers.authorization) {
       return res.status(401).json({ message: "Token no proporcionado" });
     }
+    //recupera los envios con el username del token
     const token = req.headers.authorization.split(" ")[1];
     const decoded = await jwt.verify(token, process.env.TOKEN_SECRET);
     let allShips;
@@ -76,18 +72,16 @@ router.get("/getTrackings", isAuthenticated,async (req, res, next) => {
   } catch (error) {
     console.error("Error:", error);
 
-    // Enviar respuesta HTTP 500 al cliente por un error interno del servidor
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
 //-------------------------------------------------------------------------------------
-//isAuthenticated
+
 router.delete(
   "/deleteTracking/:_id",
   isAuthenticated,
   async (req, res, next) => {
-    // ESTO YA FUNCIONA
     const _id = req.params._id;
     try {
       if (!req.headers.authorization) {
@@ -96,7 +90,7 @@ router.delete(
       const token = req.headers.authorization.split(" ")[1];
       const decoded = await jwt.verify(token, process.env.TOKEN_SECRET);
       const deleteShip = await Ships.findByIdAndDelete(_id);
-
+      //eliminamos por id, porque cuando los recuperamos montamos por id.
       if (deleteShip.AfterShip) {
         Aftership.tracking
           .deleteTracking({
@@ -117,9 +111,8 @@ router.delete(
 // isAuthenticated
 
 router.get("/goTrack/:_id", isAuthenticated, async (req, res, next) => {
-  // ESTO YA FUNCIONA
   const _id = req.params._id;
-
+  //con este endpoint haces funcionar la api, haces peticion.
   try {
     if (!req.headers.authorization) {
       return res.status(401).json({ message: "Token no proporcionado" });
@@ -183,11 +176,11 @@ router.get("/getTracking/:_id", isAuthenticated,async (req, res, next) => {
   //llamada a la api con su id para ver en que puntos esta el pedido
   const _id = req.params._id;
   try {
-    // if (!req.headers.authorization) {
-    //   return res.status(401).json({ message: "Token no proporcionado" });
-    // }
-    // const token = req.headers.authorization.split(" ")[1];
-    // const decoded = await jwt.verify(token, process.env.TOKEN_SECRET);
+    if (!req.headers.authorization) {
+      return res.status(401).json({ message: "Token no proporcionado" });
+    }
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = await jwt.verify(token, process.env.TOKEN_SECRET);
     const ship = await Ships.findById(_id);
     if (!ship) {
       res.status(401).json({ error: "No registrado en BBDD" });
@@ -205,17 +198,17 @@ router.get("/getTracking/:_id", isAuthenticated,async (req, res, next) => {
       })
       .then((result) => {
         console.log(result);
-        // Si obtienes los datos correctamente, puedes enviar el resultado con un código 200
+       
         res.status(200).json({ result });
       })
       .catch((e) => {
         console.log(e);
-        // Si ocurre un error al obtener los datos, puedes enviar un código 500 con un mensaje de error
+        
         res.status(500).json({ error: "Error al obtener el seguimiento" });
       });
   } catch (error) {
     console.log(error);
-    // Si ocurre un error general, envía un código 500 con un mensaje de error
+    
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });

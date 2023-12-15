@@ -1,6 +1,10 @@
-ya instalado python, unicamente entra en el entorno virtual con: source venv/bin/activate
+ya instalado python, unicamente entra en el 
+entorno virtual con: 
 
-npm run dev 
+-> source venv/bin/activate
+
+despues:
+-> npm run dev 
 
 deactivate para salir
 

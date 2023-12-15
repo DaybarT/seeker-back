@@ -6,7 +6,6 @@ const Hypeboost = require("../models/Hypeboost.model");
 const Product = require("../models/Product.model");
 const jwt = require("jsonwebtoken");
 
-//isAuthenticated
 
 router.post("/AddStock", isAuthenticated, async (req, res) => {
   try {
@@ -17,7 +16,7 @@ router.post("/AddStock", isAuthenticated, async (req, res) => {
     const decoded = await jwt.verify(token, process.env.TOKEN_SECRET);
 
     const { SKU, precio, talla } = req.body;
-
+    // añade stock si no eres owner, si eres owner, inicia el scrapper para la busqueda del producto.
     let newStock;
     if (decoded.role === "owner") {
       const url = "http://localhost:5005/productTool/addProduct";
@@ -68,7 +67,7 @@ router.post("/AddStock", isAuthenticated, async (req, res) => {
   }
 });
 
-//const userStock = await Stock.find({ username: userUsername }); req.user.username,
+
 router.get("/GetStock", isAuthenticated,async (req, res) => {
   try {
     if (!req.headers.authorization) {
@@ -77,7 +76,7 @@ router.get("/GetStock", isAuthenticated,async (req, res) => {
     const token = req.headers.authorization.split(" ")[1];
     const decoded = await jwt.verify(token, process.env.TOKEN_SECRET);
     let allStock;
-
+    //cogemos el username del token y lo pasamos para recuperar el stock del usuario, excepto si eres owner.
     if (decoded.role === "owner") {
       allStock = await Stock.find();
     } else {
@@ -85,7 +84,7 @@ router.get("/GetStock", isAuthenticated,async (req, res) => {
     }
     const stockPrices = await Hypeboost.find();
     const productData = await Product.find();
-
+    //esto recoge los datos de las 3 tablas y las une en funcion del SKU, de esta manera retornamos un objeto con toda la informacion.
     const stockBuilder = allStock.map((stockItem) => {
       const matchingPrice = stockPrices.find(
         (price) => price.SKU === stockItem.SKU
@@ -123,10 +122,10 @@ router.get("/GetStock", isAuthenticated,async (req, res) => {
 
 router.delete("/DeleteStock/:_id", isAuthenticated, async (req, res) => {
   try {
-    const _id = req.params._id; // id del producto a eliminar ¿esta linea pa que sirve?
+    const _id = req.params._id; // id del producto a eliminar
 
     const deletedProduct = await Stock.findByIdAndDelete(_id);
-    ////req.user.username,
+    
 
     if (!deletedProduct) {
       return res

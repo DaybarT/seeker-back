@@ -6,7 +6,6 @@ const moment = require("moment");
 const { spawn } = require("child_process");
 const jwt = require("jsonwebtoken");
 
-//isAuthenticated
 router.post("/createhb", isAuthenticated, async (req, res, next) => {
   if (!req.headers.authorization) {
     return res.status(401).json({ message: "Token no proporcionado" });
@@ -36,7 +35,7 @@ router.post("/createhb", isAuthenticated, async (req, res, next) => {
     res.status(500).json({ error: "NOK" });
   }
 });
-
+//este endpoint es unicamente para actualizar los precios.
 router.patch("/update/:sku", isAuthenticated, async (req, res, next) => {
   try {
     if (!req.headers.authorization) {
@@ -50,9 +49,6 @@ router.patch("/update/:sku", isAuthenticated, async (req, res, next) => {
     });
     const productSKU = await Hypeboost.findOne({ SKU: req.params.sku });
 
-    // console.log(productSKU.SKU);
-    // console.log(productSKU.Link);
-
     if (!productSKU) {
       res.status(500).json({ "No encontrado": productSKU });
       return;
@@ -63,8 +59,6 @@ router.patch("/update/:sku", isAuthenticated, async (req, res, next) => {
     const pythonScript =
       "/Users/daybart/Documents/Seeker/scrapper/scrapHBwLink.py";
     const procesoPython = spawn("python", [pythonScript, productSKU.Link]);
-
-    // Espera a que el proceso Python termine
     const data = await new Promise((resolve) => {
       procesoPython.stdout.on("data", (data) => resolve(data));
     });

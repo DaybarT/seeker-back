@@ -33,7 +33,7 @@ router.post("/addProduct", isAuthenticated, async (req, res) => {
       res.status(200).json({ product });
       return;
     }
-
+    //esto inicia el proceso python para hacer funcionar el scrapper.
     const pythonScript = "/Users/daybart/Documents/Seeker/scrapper/scrapHB.py";
     const procesoPython = spawn("python", [pythonScript, SKU]);
 
@@ -42,6 +42,7 @@ router.post("/addProduct", isAuthenticated, async (req, res) => {
     });
 
     try {
+      //esto devuelve un json y lo usamos para guardar productos nuevos.
       const jsonData = JSON.parse(data.toString());
       console.log(jsonData);
       if (jsonData) {
@@ -51,7 +52,7 @@ router.post("/addProduct", isAuthenticated, async (req, res) => {
           img: jsonData.image,
         });
         await newProduct.save();
-
+        //y los datos que devuelve de precios, los mandamos a otro endpoint para guardarlos.
         const url = "http://localhost:5005/hb/createhb";
         const options = {
           method: "POST",
@@ -87,6 +88,7 @@ router.post("/addProduct", isAuthenticated, async (req, res) => {
 
 router.get("/GetProducts", isAuthenticated, async (req, res) => {
   try {
+    //retorna todo los productos.
     if (!req.headers.authorization) {
       return res.status(401).json({ message: "Token no proporcionado" });
     }
@@ -110,15 +112,13 @@ router.get("/GetProducts", isAuthenticated, async (req, res) => {
         const date = new Date(matchingPrice.Fecha);
         formattedDate = date.toLocaleString(); // Puedes usar otras funciones para el formato deseado
       }
-      // Filtrar usuarios que coincidan con el SKU actual
+      //esto es unicamente para las tiendas, busqueda de usuarios por zapatilla.
       const matchedUsers = users.filter((user) => user.SKU === productItem.SKU);
-
-      // Obtener solo los nombres de usuario de los usuarios filtrados
       const usernames = matchedUsers.map((user) => ({
         username: user.username,
         talla: user.talla,
       }));
-
+      //devolvemos el objeto
       return {
         SKU: productItem.SKU,
         model: productItem.model,
